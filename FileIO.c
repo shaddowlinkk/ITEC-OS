@@ -30,7 +30,7 @@ void load_ProgramFile_data(FILE *file,Data *item){
 }
 
 void load_Dir_data(FILE *file,Data *item){
-    //todo size?
+    fread(&item->dir->numFiles,sizeof(int),1,file);
     loadData(item->dir->name,item->dir->head,file);
 }
  char *getEndDirName(char *name){
@@ -48,6 +48,7 @@ void loadData(char *dirname,node *head,FILE *file) {
     char name[11];
     memset(name, '\0', 11);
     char *end = getEndDirName(dirname);
+    // data and name diff
     while (name != end) {
         fread(name, sizeof(name), 1, file);
         if (name[9] == 't') {
@@ -71,7 +72,9 @@ void loadFile(char *filename, node *head){
         printf("file doesn't exist");
         exit(-2);
     }
-    loadData("root\0\0\0\0.d\0",head,file);
+    char name[11];
+    fread(name,sizeof(name),1,file);
+    loadData(name,head,file);
 
 
 }

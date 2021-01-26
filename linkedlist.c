@@ -3,7 +3,7 @@
 //
 #include <stdlib.h>
 #include "SystemData.h"
-node *NewNode(Data item){
+node *newNode(Data item){
     node *newNode;
     newNode = (node *) malloc(sizeof (Data));
     newNode->item=item;
@@ -12,7 +12,7 @@ node *NewNode(Data item){
 }
 void insertNode(node **head, node *newNode){
     node **trace = head;
-    while (!(*trace)){
+    while ((*trace)){
         trace = &(*trace)->next;
     }
     newNode->next= *trace;

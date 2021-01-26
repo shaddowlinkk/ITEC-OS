@@ -4,6 +4,7 @@
 
 #ifndef ITEC371_SYSTEMDATA_H
 #define ITEC371_SYSTEMDATA_H
+struct _node;
 typedef struct _textFile{
     char name[11];
     int size;
@@ -16,16 +17,14 @@ typedef struct _programFile{
 }ProgramFile;
 typedef struct _directroy {
     char name[11];
-    int size;
-    //node point but cant declare
-    void *head;
+    int numFiles;
+    struct _node *head;
 }Directroy;
 typedef union _data{
     Directroy *dir;
     ProgramFile *pfile;
     TextFile *tfile;
 }Data;
-
 
 typedef struct _node {
     Data item;
