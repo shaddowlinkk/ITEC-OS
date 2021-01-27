@@ -3,24 +3,9 @@
 #include <string.h>
 #include "SystemData.h"
 #include "linkedlist.h"
-
-int commandInput(node **head);
-
-void getName(char name[10]){
-    static char tmp[10];
-    fflush(stdin);
-    fgets(tmp,10,stdin);
-    if(tmp[strlen(tmp)-1]!='\n'){
-        int count=0;
-        while (fgetc(stdin) != '\n')
-            count++;
-        if (count>0){
-            printf("file name to big");
-        }
-    }
-    tmp[strlen(tmp)-1]='\0';
-    strcpy(name,tmp);
-}
+#include "Utils.h"
+int done=0;
+int commandInput(node **head,char dname[10]);
 
 void createTextFile(node **head,char name[10]){
     Data item;
@@ -28,6 +13,8 @@ void createTextFile(node **head,char name[10]){
     char text[100];
     printf("Enter contents>");
     scanf("%s",text);
+    item.tfile->text=malloc(strlen(text));
+    strcpy(item.tfile->text,text);
     item.tfile->size=strlen(text);
     strcpy(item.tfile->name,name);
   //  return item;
@@ -39,9 +26,9 @@ void createProgrameFile(node **head,char name[10]){
     item.pfile=malloc(sizeof (ProgramFile));
     strcpy(item.pfile->name,name);
     printf("Enter CPU requirements>");
-    scanf("%d",&item.pfile->cpu);
+    item.pfile->cpu=getInt();
     printf("Enter memory requirements>");
-    scanf("%d",&item.pfile->mem);
+    item.pfile->mem=getInt();
     insertNode(head,newNode(item));
 }
 
@@ -50,16 +37,20 @@ void createDir(node **head,char name[10]){
     item.dir=malloc(sizeof (Directroy));
     strcpy(item.dir->name,name);
     item.dir->head=NULL;
-    item.dir->numFiles=commandInput((node **)&item.dir->head);
+    item.dir->numFiles=commandInput((node **)&item.dir->head,name);
     insertNode(head,newNode(item));
 }
 
-int commandInput(node **head){
+int commandInput(node **head,char dname[10]){
     char command[50];
     int fileCount=0;
     while (1){
+        if (done){
+            return fileCount;
+        }
         char name[10];
-        printf("Command>");
+        memset(name,'\0', sizeof(name));
+        printf("Command@%s>",dname);
         scanf("%s",command);
         if(strcmp(command,"CreateFile")==0){
             printf("Enter filename>");
@@ -74,6 +65,10 @@ int commandInput(node **head){
         }else if(strcmp(command,"CreateDir")==0){
             printf("Enter directory name>");
             getName(name);
+            while (name[strlen(name)-1]!='d'){
+                printf("filename needs to end in .d\nEnter directory name>");
+                getName(name);
+            }
             createDir(head,name);
             fileCount ++;
         }
@@ -81,8 +76,8 @@ int commandInput(node **head){
             return fileCount;
         }
         else if(strcmp(command,"quit")==0){
-            // todo need to end better
-            exit(0);
+            done=1;
+            return fileCount;
         }
     }
 
@@ -99,11 +94,10 @@ int main(int argc, char **argv){
         }
         Data root;
         root.dir=malloc(sizeof(Directroy));
-        char name[6]="root.d";
+        char name[10]="root.d\0\0\0\0";
         strcpy(root.dir->name,name);
         root.dir->head=NULL;
-        root.dir->numFiles=commandInput(&root.dir->head);
-        printf("print:%s:%s",root.dir->head->item.dir->name,root.dir->head->item.dir->head->item.tfile->name);
+        root.dir->numFiles=commandInput(&root.dir->head,root.dir->name);
     }else{
         // if now promp and ecit programe
         printf("%s","No file specified\n");

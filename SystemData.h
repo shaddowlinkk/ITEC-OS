@@ -8,7 +8,7 @@ struct _node;
 typedef struct _textFile{
     char name[11];
     int size;
-    char *text;
+    char *text;//needs freed
 }TextFile;
 typedef struct _programFile{
     char name[11];
