@@ -5,4 +5,5 @@
 #ifndef ITEC371_FILEIO_H
 #define ITEC371_FILEIO_H
 void loadFile(char *filename, node *head);
+void saveFile(FILE *file, node **head);
 #endif //ITEC371_FILEIO_H

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "SystemData.h"
 #include "linkedlist.h"
+#include "FileIO.h"
 #include "Utils.h"
 int done=0;
 int commandInput(node **head,char dname[10]);
@@ -87,17 +88,20 @@ int main(int argc, char **argv){
     //checking if thare is a secone arg to reage
     if(argc>=2){
         FILE *file;
-       file=fopen(argv[1],"rb+");
+       file=fopen(argv[1],"wb");//rb+ <- not that?
         if (file==NULL){
             printf("no file by that name found creating file");
             file=fopen(argv[1],"wb");
         }
+        node *start=NULL;
         Data root;
         root.dir=malloc(sizeof(Directroy));
         char name[10]="root.d\0\0\0\0";
         strcpy(root.dir->name,name);
         root.dir->head=NULL;
         root.dir->numFiles=commandInput(&root.dir->head,root.dir->name);
+        insertNode(&start,newNode(root));
+        saveFile(file,&start);
     }else{
         // if now promp and ecit programe
         printf("%s","No file specified\n");

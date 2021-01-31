@@ -78,3 +78,60 @@ void loadFile(char *filename, node *head){
 
 
 }
+void writeName(FILE *file,char filename[11],char type){
+    char name[11];
+    memset(name,'\0', sizeof(name));
+    memcpy(name,filename,strlen(filename)-2);
+    name[8]='.';
+    name[9]=type;
+    fwrite(name,11,1,file);
+}
+
+void writeEndDir(FILE *file,char filename[11]){
+    char end[11];
+    char name[8];
+    memset(name, '\0', 8);
+    memset(end,'\0',11);
+    memcpy(name, filename, strlen(filename) - 2);
+    strcpy(end,"end");
+    strcat(end, name);
+    fwrite(end,sizeof(end),1,file);
+
+}
+
+void write_dir_data(FILE *file,node **head){
+    writeName(file,(*head)->item.dir->name,'d');
+    fwrite(&(*head)->item.dir->numFiles,sizeof(int),1,file);
+    saveFile(file,&(*head)->item.dir->head);
+    writeEndDir(file,(*head)->item.dir->name);
+
+}
+
+void write_text_data(FILE *file,node **head){
+    writeName(file,(*head)->item.tfile->name,'t');
+    fwrite(&(*head)->item.tfile->size, sizeof(int),1,file);
+    char text[(*head)->item.tfile->size];
+    memcpy(text,(*head)->item.tfile->text,(*head)->item.tfile->size);
+    fwrite(text, sizeof(text),1,file);
+}
+
+void write_porg_data(FILE *file,node **head){
+    writeName(file,(*head)->item.tfile->name,'p');
+    fwrite(&(*head)->item.pfile->cpu, sizeof(int),1,file);
+    fwrite(&(*head)->item.pfile->mem, sizeof(int),1,file);
+}
+
+void saveFile(FILE *file, node **head){
+    for(;(*head);head=&(*head)->next){
+        char type = (*head)->item.dir->name[strlen((*head)->item.dir->name)-1];
+        if (type=='d')
+            write_dir_data(file,head);
+        else if (type=='t')
+            write_text_data(file,head);
+        else if (type=='p')
+            write_text_data(file,head);
+        else
+            printf("error file type %c not valid",type);
+    }
+
+}
