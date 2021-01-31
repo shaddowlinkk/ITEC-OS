@@ -129,7 +129,7 @@ void saveFile(FILE *file, node **head){
         else if (type=='t')
             write_text_data(file,head);
         else if (type=='p')
-            write_text_data(file,head);
+            write_porg_data(file,head);
         else
             printf("error file type %c not valid",type);
     }
