@@ -10,11 +10,11 @@ int commandInput(node **head,char dname[10]);
 
 void createTextFile(node **head,char name[10]){
     Data item;
-    item.tfile=malloc(sizeof (TextFile));
+    item.tfile=(TextFile *)malloc(sizeof (TextFile));
     char text[100];
     printf("Enter contents>");
     scanf("%s",text);
-    item.tfile->text=malloc(strlen(text));
+    item.tfile->text=(char *)malloc(strlen(text));
     strcpy(item.tfile->text,text);
     item.tfile->size=strlen(text);
     strcpy(item.tfile->name,name);
@@ -24,7 +24,7 @@ void createTextFile(node **head,char name[10]){
 
 void createProgrameFile(node **head,char name[10]){
     Data item;
-    item.pfile=malloc(sizeof (ProgramFile));
+    item.pfile=(ProgramFile *)malloc(sizeof (ProgramFile));
     strcpy(item.pfile->name,name);
     printf("Enter CPU requirements>");
     item.pfile->cpu=getInt();
@@ -35,7 +35,7 @@ void createProgrameFile(node **head,char name[10]){
 
 void createDir(node **head,char name[10]){
     Data item;
-    item.dir=malloc(sizeof (Directroy));
+    item.dir=(Directroy *)malloc(sizeof (Directroy));
     strcpy(item.dir->name,name);
     item.dir->head=NULL;
     item.dir->numFiles=commandInput((node **)&item.dir->head,name);
@@ -49,10 +49,11 @@ int commandInput(node **head,char dname[10]){
         if (done){
             return fileCount;
         }
-        char name[10];
+        char name[11];
         memset(name,'\0', sizeof(name));
         printf("Command@%s>",dname);
         scanf("%s",command);
+        getchar();
         if(strcmp(command,"CreateFile")==0){
             printf("Enter filename>");
             getName(name);
@@ -73,7 +74,7 @@ int commandInput(node **head,char dname[10]){
             createDir(head,name);
             fileCount ++;
         }
-        else if(strcmp(command,"Enddir")==0){
+        else if(strcmp(command,"EndDir")==0){
             return fileCount;
         }
         else if(strcmp(command,"quit")==0){
@@ -95,12 +96,13 @@ int main(int argc, char **argv){
         }
         node *start=NULL;
         Data root;
-        root.dir=malloc(sizeof(Directroy));
-        char name[10]="root.d\0\0\0\0";
+        root.dir=(Directroy *)malloc(sizeof(Directroy));
+        char name[11]="root.d\0\0\0\0";
         strcpy(root.dir->name,name);
         root.dir->head=NULL;
         root.dir->numFiles=commandInput(&root.dir->head,root.dir->name);
         insertNode(&start,newNode(root));
+        printf("Binary file structure is:\n");
         saveFile(file,&start);
     }else{
         // if now promp and ecit programe

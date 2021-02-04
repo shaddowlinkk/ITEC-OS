@@ -5,12 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "SystemData.h"
-
 #include "FileIO.h"
 void loadData(char *dirname,node *head,FILE *file);
 
 char *getText(FILE *file, int size){
-    char *text = malloc(size);
+    char *text = (char *) malloc(size);
     for (int i=0;i<size;i++){
         fread(&text[i],sizeof(char),1,file);
     }
@@ -34,7 +33,7 @@ void load_Dir_data(FILE *file,Data *item){
     loadData(item->dir->name,item->dir->head,file);
 }
  char *getEndDirName(char *name){
-    char *endName = malloc(11);
+    char *endName = (char *) malloc(11);
     memset(endName,'\0',11);
     strcpy(endName,"end");
     for(int i =0;name[i]!='\0'||name[i]!='.'&& i<8;i++){
@@ -100,23 +99,33 @@ void writeEndDir(FILE *file,char filename[11]){
 }
 
 void write_dir_data(FILE *file,node **head){
+    printf("%li: Directory %s\n",ftell(file),(*head)->item.dir->name);
     writeName(file,(*head)->item.dir->name,'d');
+    printf("%li: Directory %s contains %i file/dir\n",ftell(file),(*head)->item.dir->name,(*head)->item.dir->numFiles);
     fwrite(&(*head)->item.dir->numFiles,sizeof(int),1,file);
     saveFile(file,&(*head)->item.dir->head);
+    printf("%li: End of Directory %s\n",ftell(file),(*head)->item.dir->name);
     writeEndDir(file,(*head)->item.dir->name);
 
 }
 
 void write_text_data(FILE *file,node **head){
+    printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
+    printf("Type: text file\n");
     writeName(file,(*head)->item.tfile->name,'t');
+    printf("%li: Size of text File %i\n",ftell(file),(*head)->item.tfile->size);
     fwrite(&(*head)->item.tfile->size, sizeof(int),1,file);
     char text[(*head)->item.tfile->size];
     memcpy(text,(*head)->item.tfile->text,(*head)->item.tfile->size);
+    printf("%li: Content of text File %s\n",ftell(file),(*head)->item.tfile->text);
     fwrite(text, sizeof(text),1,file);
 }
 
 void write_porg_data(FILE *file,node **head){
+    printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
+    printf("Type: program file\n");
     writeName(file,(*head)->item.tfile->name,'p');
+    printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n",ftell(file),(*head)->item.pfile->cpu,(*head)->item.pfile->mem);
     fwrite(&(*head)->item.pfile->cpu, sizeof(int),1,file);
     fwrite(&(*head)->item.pfile->mem, sizeof(int),1,file);
 }

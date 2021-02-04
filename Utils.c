@@ -20,13 +20,13 @@ int getInt(){
 }
 
 void getName(char name[10]) {
-    static char tmp[10];
-    char *filetypes = "tpd";
+    static char tmp[12];
+    char filetypes[3] = {'t','p','d'};
     int complete=0;
     do {
         complete=1;
         fflush(stdin);
-        fgets(tmp, 10, stdin);
+        fgets(tmp, 12, stdin);
         if (tmp[strlen(tmp) - 1] != '\n') {
             int count = 0;
             while (fgetc(stdin) != '\n')
@@ -41,6 +41,8 @@ void getName(char name[10]) {
             printf("no name or file name to small\nReenter name>");
             complete=0;
         }
+        char *i= strchr(filetypes, tmp[strlen(tmp) - 2]);
+        char c = tmp[strlen(tmp)-3];
         if((strchr(filetypes, tmp[strlen(tmp) - 2]) == NULL) || (tmp[strlen(tmp)-3]!='.')) {
             printf("file name not right\nReenter name>");
             complete = 0;
