@@ -111,7 +111,7 @@ void write_dir_data(FILE *file,node **head){
 
 void write_text_data(FILE *file,node **head){
     printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
-    printf("\tType: text file\n");
+    printf("Type: text file\n");
     writeName(file,(*head)->item.tfile->name,'t');
     printf("%li: Size of text File %i\n",ftell(file),(*head)->item.tfile->size);
     fwrite(&(*head)->item.tfile->size, sizeof(int),1,file);
@@ -123,7 +123,7 @@ void write_text_data(FILE *file,node **head){
 
 void write_porg_data(FILE *file,node **head){
     printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
-    printf("\tType: program file\n");
+    printf("Type: program file\n");
     writeName(file,(*head)->item.tfile->name,'p');
     printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n",ftell(file),(*head)->item.pfile->cpu,(*head)->item.pfile->mem);
     fwrite(&(*head)->item.pfile->cpu, sizeof(int),1,file);
