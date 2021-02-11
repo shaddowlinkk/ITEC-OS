@@ -1,11 +1,114 @@
 //
 // Created by nathan on 1/19/2021.
-//
+// This File contatins all funxtions for File IO
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "SystemData.h"
 #include "FileIO.h"
+
+
+
+//--------------------------------file saving code ------------------------------------------------------------//
+
+/**
+ * writes the file name to the bin file
+ * @param file The file descriptor to save to
+ * @param filename The name of the file
+ * @param type The type of the file
+ */
+void writeName(FILE *file,char filename[11],char type){
+    char name[11];
+    memset(name,'\0', sizeof(name));
+    memcpy(name,filename,strlen(filename)-2);
+    name[8]='.';
+    name[9]=type;
+    fwrite(name,11,1,file);
+}
+/**
+ * writes the End dir to the bin file
+ * @param file The file descriptor to save to
+ * @param filename The name of the dir
+ */
+void writeEndDir(FILE *file,char filename[11]){
+    //temp vars for string manip
+    char end[11];
+    char name[8];
+    memset(name, '\0', 8);
+    memset(end,'\0',11);
+    memcpy(name, filename, strlen(filename) - 2);
+    strcpy(end,"End");
+    strcat(end, name);
+    fwrite(end,sizeof(end),1,file);
+
+}
+/**
+ * writes the data in a dir to bin file
+ * @param file The file descriptor to save to
+ * @param pnode a pointer to a node of the dir
+ */
+void write_dir_data(FILE *file,node **pnode){
+    printf("%li: Directory %s\n",ftell(file),(*pnode)->item.dir->name);
+    writeName(file, (*pnode)->item.dir->name, 'd');
+    printf("%li: Directory %s contains %i file/dir\n", ftell(file), (*pnode)->item.dir->name, (*pnode)->item.dir->numFiles);
+    fwrite(&(*pnode)->item.dir->numFiles, sizeof(int), 1, file);
+    saveFile(file,&(*pnode)->item.dir->head);
+    printf("%li: End of Directory %s\n",ftell(file),(*pnode)->item.dir->name);
+    writeEndDir(file,(*pnode)->item.dir->name);
+
+}
+/**
+ *
+ * writes the data in a test file to bin file
+ * @param file The file descriptor to save to
+ * @param pnode A pointer to a node of the dir
+ */
+void write_text_data(FILE *file,node **pnode){
+    printf("%li: Filename %s\n",ftell(file),(*pnode)->item.dir->name);
+    printf("Type: text file\n");
+    writeName(file, (*pnode)->item.tfile->name, 't');
+    printf("%li: Size of text File %i\n",ftell(file),(*pnode)->item.tfile->size);
+    fwrite(&(*pnode)->item.tfile->size, sizeof(int), 1, file);
+    char text[(*pnode)->item.tfile->size];
+    memcpy(text, (*pnode)->item.tfile->text, (*pnode)->item.tfile->size);
+    printf("%li: Content of text File %s\n",ftell(file),(*pnode)->item.tfile->text);
+    fwrite(text, sizeof(text),1,file);
+}
+/**
+ *
+ * writes the data in a prog file to bin file
+ * @param file The file descriptor to save to
+ * @param pnode A pointer to a node of the dir
+ */
+void write_porg_data(FILE *file,node **pNode){
+    printf("%li: Filename %s\n",ftell(file),(*pNode)->item.dir->name);
+    printf("Type: program file\n");
+    writeName(file, (*pNode)->item.tfile->name, 'p');
+    printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n", ftell(file), (*pNode)->item.pfile->cpu, (*pNode)->item.pfile->mem);
+    fwrite(&(*pNode)->item.pfile->cpu, sizeof(int), 1, file);
+    fwrite(&(*pNode)->item.pfile->mem, sizeof(int), 1, file);
+}
+/**
+ * saves the data of a dir to a bin file
+ * @param file The file to save to
+ * @param head A pointer to the begining of the list
+ */
+void saveFile(FILE *file, node **head){
+    for(;(*head);head=&(*head)->next){
+        char type = (*head)->item.dir->name[strlen((*head)->item.dir->name)-1];
+        if (type=='d')
+            write_dir_data(file,head);
+        else if (type=='t')
+            write_text_data(file,head);
+        else if (type=='p')
+            write_porg_data(file,head);
+        else
+            printf("error file type %c not valid",type);
+    }
+
+}
+
+//--------------------------------file reading (code ignore this)---------------------------------------------------//
 void loadData(char *dirname,node *head,FILE *file);
 
 char *getText(FILE *file, int size){
@@ -35,7 +138,7 @@ void load_Dir_data(FILE *file,Data *item){
  char *getEndDirName(char *name){
     char *endName = (char *) malloc(11);
     memset(endName,'\0',11);
-    strcpy(endName,"end");
+    strcpy(endName,"End");
     for(int i =0;name[i]!='\0'||name[i]!='.'&& i<8;i++){
         endName[i+3]=name[i];
     }
@@ -75,72 +178,5 @@ void loadFile(char *filename, node *head){
     fread(name,sizeof(name),1,file);
     loadData(name,head,file);
 
-
-}
-void writeName(FILE *file,char filename[11],char type){
-    char name[11];
-    memset(name,'\0', sizeof(name));
-    memcpy(name,filename,strlen(filename)-2);
-    name[8]='.';
-    name[9]=type;
-    fwrite(name,11,1,file);
-}
-
-void writeEndDir(FILE *file,char filename[11]){
-    char end[11];
-    char name[8];
-    memset(name, '\0', 8);
-    memset(end,'\0',11);
-    memcpy(name, filename, strlen(filename) - 2);
-    strcpy(end,"end");
-    strcat(end, name);
-    fwrite(end,sizeof(end),1,file);
-
-}
-
-void write_dir_data(FILE *file,node **head){
-    printf("%li: Directory %s\n",ftell(file),(*head)->item.dir->name);
-    writeName(file,(*head)->item.dir->name,'d');
-    printf("%li: Directory %s contains %i file/dir\n",ftell(file),(*head)->item.dir->name,(*head)->item.dir->numFiles);
-    fwrite(&(*head)->item.dir->numFiles,sizeof(int),1,file);
-    saveFile(file,&(*head)->item.dir->head);
-    printf("%li: End of Directory %s\n",ftell(file),(*head)->item.dir->name);
-    writeEndDir(file,(*head)->item.dir->name);
-
-}
-
-void write_text_data(FILE *file,node **head){
-    printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
-    printf("Type: text file\n");
-    writeName(file,(*head)->item.tfile->name,'t');
-    printf("%li: Size of text File %i\n",ftell(file),(*head)->item.tfile->size);
-    fwrite(&(*head)->item.tfile->size, sizeof(int),1,file);
-    char text[(*head)->item.tfile->size];
-    memcpy(text,(*head)->item.tfile->text,(*head)->item.tfile->size);
-    printf("%li: Content of text File %s\n",ftell(file),(*head)->item.tfile->text);
-    fwrite(text, sizeof(text),1,file);
-}
-
-void write_porg_data(FILE *file,node **head){
-    printf("%li: Filename %s\n",ftell(file),(*head)->item.dir->name);
-    printf("Type: program file\n");
-    writeName(file,(*head)->item.tfile->name,'p');
-    printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n",ftell(file),(*head)->item.pfile->cpu,(*head)->item.pfile->mem);
-    fwrite(&(*head)->item.pfile->cpu, sizeof(int),1,file);
-    fwrite(&(*head)->item.pfile->mem, sizeof(int),1,file);
-}
-
-void saveFile(FILE *file, node **head){
-    for(;(*head);head=&(*head)->next){
-        char type = (*head)->item.dir->name[strlen((*head)->item.dir->name)-1];
-        if (type=='d')
-            write_dir_data(file,head);
-        else if (type=='t')
-            write_text_data(file,head);
-        else if (type=='p')
-            write_porg_data(file,head);
-        else
-            printf("error file type %c not valid",type);
-    }
 
 }
