@@ -1,6 +1,6 @@
 //
 // Created by nathan on 1/19/2021.
-//
+// this file conntanes the structs for the system
 
 #ifndef ITEC371_SYSTEMDATA_H
 #define ITEC371_SYSTEMDATA_H
