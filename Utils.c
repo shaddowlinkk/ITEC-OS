@@ -7,6 +7,7 @@
 #include <string.h>
 #define MAX_BUFF_LEN 100
 #include "Utils.h"
+// need to handle \r\n better
 /**
  * this make is so the user can only input integers
  * @return the integer the user entered
@@ -41,8 +42,11 @@ void getName(char name[10]) {
         fgets(tmp, 11, stdin);
         if (tmp[strlen(tmp) - 1] != '\n') {
             int count = 0;
-            while (fgetc(stdin) != '\n')
+            char next = fgetc(stdin);
+            while  (next != '\n' && next != '\r') {
+                next = fgetc(stdin);
                 count++;
+            }
             //checking the size is to big
             if (count > 0) {
                 printf("file name to big\nReenter name>");
@@ -53,13 +57,21 @@ void getName(char name[10]) {
             }
 
         }
+        if(tmp[strlen(tmp) - 2] == 0x0d){
+            int blen=strlen(tmp);
+            tmp[strlen(tmp) - 2]='\n';
+            tmp[strlen(tmp) - 1]='\0';
+            int len=strlen(tmp);
+        }
         //checking the file name is not to small
         else if(strlen(tmp)<=3){
+            memset(tmp,'\0',sizeof(tmp));
             printf("no name or file name to small\nReenter name>");
             complete=0;
         }
         //check the file type ie .t is a valid type
         else if((strchr(filetypes, tmp[strlen(tmp) - 2]) == NULL) || (tmp[strlen(tmp)-3]!='.')) {
+            memset(tmp,'\0',sizeof(tmp));
             printf("file name not right\nReenter name>");
             complete = 0;
         }

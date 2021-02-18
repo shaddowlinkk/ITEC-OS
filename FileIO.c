@@ -67,7 +67,7 @@ void write_text_data(FILE *file,node **pnode){
     printf("%li: Filename %s\n",ftell(file),(*pnode)->item.dir->name);
     printf("Type: text file\n");
     writeName(file, (*pnode)->item.tfile->name, 't');
-    printf("%li: Size of text File %i\n",ftell(file),(*pnode)->item.tfile->size);
+    printf("%li: Size of text File %i byte\n",ftell(file),(*pnode)->item.tfile->size);
     fwrite(&(*pnode)->item.tfile->size, sizeof(int), 1, file);
     char text[(*pnode)->item.tfile->size];
     memcpy(text, (*pnode)->item.tfile->text, (*pnode)->item.tfile->size);
