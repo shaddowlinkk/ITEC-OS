@@ -2,6 +2,8 @@
 // Created by nathan on 1/21/2021.
 // This file contains all functions for the linked list
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "SystemData.h"
 /**
  * This function isused to create a new node
@@ -29,10 +31,29 @@ void insertNode(node **head, node *newNode){
     *trace=newNode;
 }
 
-// this function is deprecated and not used
-void removeNode(node ** item){
-    node *tmp =(*item);
-    (*item)=(*item)->next;
-    free(tmp);
+//todo need to make it so that nameing format is constent
+node *findNode(node **head,char name[11]){
+    char targetName[8];
+    strncpy(targetName,name,8);
+    node **trace = head;
+    char curName[8];
+    strncpy(curName,(*trace)->item.dir->name,8);
+    curName[strlen(curName)-1]='\0';
+    curName[strlen(curName)-1]='\0';
+    while ((*trace)&&(strcmp(targetName,curName)!=0)){
+        trace = &(*trace)->next;
+        strncpy(curName,(*trace)->item.dir->name,8);
+        curName[strlen(curName)-1]='\0';
+        curName[strlen(curName)-1]='\0';
+    }
+    return (*trace);
+}
+void listNodeNames(node **head){
+    node **trace = head;
+    while ((*trace)){
+        printf("%s ",(*trace)->item.dir->name);
+        trace = &(*trace)->next;
+    }
+    printf("\n");
 }
 #include "linkedlist.h"

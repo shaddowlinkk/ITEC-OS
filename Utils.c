@@ -31,6 +31,8 @@ int getInt(){
  * this is where we are getting the name of a file a check the that input is a valid name
  * @param name The array that the name is stored in
  */
+
+//todo make this a constraining of a name and not the getting of the name
 void getName(char name[10]) {
     static char tmp[12];
     memset(tmp,'\0',sizeof(tmp));
@@ -84,6 +86,7 @@ void getName(char name[10]) {
  * this is where we are getting the name of a dir
  * @param name The array that the name is stored in
  */
+//todo make this a constraining of a name and not the getting of the name
 void getDirName(char name[8]) {
     static char tmp[10];
     memset(tmp,'\0',sizeof(tmp));

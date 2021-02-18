@@ -10,7 +10,8 @@
 
 // tells when the program is done
 int done=0;
-int commandInput(node **head,char dname[10]);
+node *start=NULL;
+void  commandInput(Data *dir,char dname[10]);
 /**
  * this function creates a text file for the linked list using the data union.
  * @param head The start the list that you are reading.
@@ -54,7 +55,7 @@ void createDir(node **head,char name[10]){
     item.dir=(Directroy *)malloc(sizeof (Directroy));
     strcpy(item.dir->name,name);
     item.dir->head=NULL;
-    item.dir->numFiles=commandInput((node **)&item.dir->head,name);
+    item.dir->numFiles=0;
     insertNode(head,newNode(item));
 }
 /**
@@ -63,12 +64,14 @@ void createDir(node **head,char name[10]){
  * @param dname the name of the directory that you are in
  * @return the file count of the directory
  */
-int commandInput(node **head,char dname[10]){
+void commandInput(Data *dir,char dname[10]){
+    node **head=&dir->dir->head;
     char command[50];
     int fileCount=0;
     while (1){
         if (done){
-            return fileCount;
+            dir->dir->numFiles=fileCount;
+            return;
         }
         char name[11];
         memset(name,'\0', sizeof(name));
@@ -88,7 +91,7 @@ int commandInput(node **head,char dname[10]){
             fileCount ++;
             //what to do for he Create Dir command
         }else if(strcmp(command,"CreateDir")==0){
-            printf("Enter directory name>");
+            //printf("Enter directory name>");
             getDirName(name);
             strcat(name,".d");
             //chacking that the .d got in the file name my need to remove
@@ -101,15 +104,31 @@ int commandInput(node **head,char dname[10]){
 
             createDir(head,name);
             fileCount ++;
+        }else if(strcmp(command,"cat")==0){
+            char sc[11];
+            memset(sc,'\0', sizeof(sc));
+            scanf("%s",sc);
+            node *found=findNode(&dir->dir->head,sc);
+            printf("%s\n",found->item.tfile->text);
+        }else if(strcmp(command,"ls")==0){
+            listNodeNames(&dir->dir->head);
+        }else if(strcmp(command,"cd")==0){
+            char sc[11];
+            memset(sc,'\0', sizeof(sc));
+            scanf("%s",sc);
+            node *found=findNode(&dir->dir->head,sc);
+            printf("found name:%s",found->item.dir->name);
         }
             //what to do the the EndDir command
         else if(strcmp(command,"EndDir")==0){
-            return fileCount;
+            dir->dir->numFiles=fileCount;
+            return;
         }
             //what to do the the quit command
         else if(strcmp(command,"quit")==0){
             done=1;
-            return fileCount;
+            dir->dir->numFiles=fileCount;
+            return;
         }
     }
 
@@ -129,19 +148,18 @@ int main(int argc, char **argv){
         }
 
         // setting up the root dir
-        node *start=NULL;
         Data root;
         root.dir=(Directroy *)malloc(sizeof(Directroy));
         char name[11]="root.d\0\0\0\0";
         strcpy(root.dir->name,name);
         root.dir->head=NULL;
         //start the shell for root dir
-        root.dir->numFiles=commandInput(&root.dir->head,root.dir->name);
         insertNode(&start,newNode(root));
-
+        commandInput(&root, root.dir->name);
         //printing out put for the bin file
         printf("Binary file structure is:\n");
         //saving the file
+        //todo pull the prinf functionality from this function mabey not
         saveFile(file,&start);
     }else{
         // if now promp and ecit programe

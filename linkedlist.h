@@ -8,5 +8,7 @@
 void removeNode(node ** item);
 void insertNode(node **head, node *newNode);
 node *newNode(Data item);
+void listNodeNames(node **head);
+node *findNode(node **head,char name[11]);
 
 #endif //ITEC371_LINKEDLIST_H
