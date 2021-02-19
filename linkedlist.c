@@ -37,14 +37,11 @@ node *findNode(node **head,char name[11]){
     strncpy(targetName,name,8);
     node **trace = head;
     char curName[8];
-    strncpy(curName,(*trace)->item.dir->name,8);
-    curName[strlen(curName)-1]='\0';
-    curName[strlen(curName)-1]='\0';
+    if((*trace))
+        strncpy(curName,(*trace)->item.dir->name,8);
     while ((*trace)&&(strcmp(targetName,curName)!=0)){
         trace = &(*trace)->next;
         strncpy(curName,(*trace)->item.dir->name,8);
-        curName[strlen(curName)-1]='\0';
-        curName[strlen(curName)-1]='\0';
     }
     return (*trace);
 }

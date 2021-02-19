@@ -18,6 +18,7 @@ typedef struct _programFile{
 typedef struct _directroy {
     char name[11];
     int numFiles;
+    char *pwd;
     struct _node *head;
 }Directroy;
 typedef union _data{

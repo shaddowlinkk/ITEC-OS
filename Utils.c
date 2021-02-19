@@ -33,6 +33,24 @@ int getInt(){
  */
 
 //todo make this a constraining of a name and not the getting of the name
+
+int checkNameComp(char name[11]){
+    char filetypes[3] = {'t','p','d'};
+    int results=-1;
+    char tmp[11];
+    memset(tmp,'\0',sizeof(tmp));
+    strcpy(tmp,name);
+     if(strlen(tmp) <= 3){
+        memset(tmp, '\0', sizeof(tmp));
+         return 1;
+    }
+        //check the file type ie .t is a valid type
+    else if((strchr(filetypes, tmp[strlen(tmp) - 1]) == NULL) || (tmp[strlen(tmp) - 2] != '.')) {
+        memset(tmp, '\0', sizeof(tmp));
+         return 2;
+    }
+    return 0;
+}
 void getName(char name[10]) {
     static char tmp[12];
     memset(tmp,'\0',sizeof(tmp));
