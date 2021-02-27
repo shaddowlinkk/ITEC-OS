@@ -50,6 +50,7 @@ void createProgrameFile(node **head,char name[10]){
  * this funtion create a new directory node for the linked list it also makes the lest head for the dir list
  * @param head The start the list that you are reading.
  * @param name The name of the file you want to make.
+ * @param pwd The path of the directory that you are creating the new directory in
  */
 void createDir(node **head,char name[10],char *pwd){
     Data item;
@@ -71,7 +72,7 @@ void createDir(node **head,char name[10],char *pwd){
 }
 /**
  *  this function runs the shell for the directory that you are in.
- * @param head The start the list that you are reading.
+ * @param dir The dir data obj of that  directory.
  * @param dname the name of the directory that you are in
  * @return the file count of the directory
  */
@@ -80,6 +81,7 @@ void commandInput(Data *dir,char dname[10]){
     char command[50];
     int fileCount=0;
     while (1){
+        dir->dir->numFiles = fileCount;
         if (done){
             dir->dir->numFiles=fileCount;
             return;
@@ -110,11 +112,11 @@ void commandInput(Data *dir,char dname[10]){
             if (checkNameComp(name) == 2 && strlen(name) <= 8) {
                 strcat(name, ".d");
             }
-                //chacking that the .d got in the file name my need to remove
-                if(checkNameComp(name)==0) {
-                    createDir(head, name,dir->dir->pwd);
-                    fileCount++;
-                }
+            //chacking that the .d got in the file name my need to remove
+            if(checkNameComp(name)==0) {
+                createDir(head, name,dir->dir->pwd);
+                fileCount++;
+            }
         }else if(strcmp(command,"cat")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -131,6 +133,7 @@ void commandInput(Data *dir,char dname[10]){
             printf("%s\n",dir->dir->pwd);
         }else if(strcmp(command,"printInfo")==0){
             printf("Binary file structure is:\n");
+            fseek(file,0,SEEK_SET);
             saveFile(file,&start);
         }else if(strcmp(command,"cd")==0){
             char sc[11];
@@ -150,11 +153,6 @@ void commandInput(Data *dir,char dname[10]){
                 }
             }
         }
-            //what to do the the EndDir command
-/*        else if(strcmp(command,"EndDir")==0){
-            dir->dir->numFiles=fileCount;
-            return;
-        }*/
             //what to do the the quit command
         else if(strcmp(command,"quit")==0){
             done=1;

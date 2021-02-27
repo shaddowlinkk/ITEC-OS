@@ -28,12 +28,10 @@ int getInt(){
     return data;
 }
 /**
- * this is where we are getting the name of a file a check the that input is a valid name
- * @param name The array that the name is stored in
+ * this functions make sure that names of files are compliant with what is expected
+ * @param name the name that needs to be checked
+ * @return whare it failed or 0 if the name is compliant
  */
-
-//todo make this a constraining of a name and not the getting of the name
-
 int checkNameComp(char name[11]){
     char filetypes[3] = {'t','p','d'};
     int results=-1;
@@ -51,6 +49,8 @@ int checkNameComp(char name[11]){
     }
     return 0;
 }
+
+//------------------------------ these functions have deprecated and should not be used-------------------------------//
 void getName(char name[10]) {
     static char tmp[12];
     memset(tmp,'\0',sizeof(tmp));
@@ -104,7 +104,6 @@ void getName(char name[10]) {
  * this is where we are getting the name of a dir
  * @param name The array that the name is stored in
  */
-//todo make this a constraining of a name and not the getting of the name
 void getDirName(char name[8]) {
     static char tmp[10];
     memset(tmp,'\0',sizeof(tmp));
