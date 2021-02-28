@@ -6,6 +6,7 @@
 #include <string.h>
 #include "SystemData.h"
 #include "FileIO.h"
+#include "linkedlist.h"
 
 
 
@@ -109,67 +110,88 @@ void saveFile(FILE *file, node **head){
 }
 
 //--------------------------------file reading (code ignore this)---------------------------------------------------//
-void loadData(char *dirname,node *head,FILE *file);
+void loadData(char *dirname,node **head,FILE *file);
+void fixname(char name[11]){
+    name[4]=name[8];
+    name[5]=name[9];
+    name[8]='\0';
+    name[9]='\0';
+}
 
 char *getText(FILE *file, int size){
     char *text = (char *) malloc(size);
+    memset(text,'\0',sizeof(size));
     for (int i=0;i<size;i++){
         fread(&text[i],sizeof(char),1,file);
     }
     return text;
 }
 
-void load_TextFile_data(FILE *file,Data *item){
-    int size;
-    fread(&size,sizeof(int),1,file);
-    item->tfile->size=size;
-    item->tfile->text=getText(file,size);
+void load_TextFile_data(node **head,char name[10],FILE *file){
+    Data item;
+    item.tfile=(TextFile *)malloc(sizeof (TextFile));
+    int i= ftell(file);
+    fread(&item.tfile->size,sizeof(int),1,file);
+    item.tfile->text=(char *)malloc(item.tfile->size);
+    strcpy(item.tfile->text,getText(file,item.tfile->size));
+    strcpy(item.tfile->name,name);
+    insertNode(head,newNode(item));
 }
 
-void load_ProgramFile_data(FILE *file,Data *item){
-    fread(&item->pfile->cpu,sizeof(int),1,file);
-    fread(&item->pfile->mem,sizeof(int),1,file);
+void load_ProgramFile_data(node **head,char name[10],FILE *file){
+    Data item;
+    item.pfile=(ProgramFile *)malloc(sizeof (ProgramFile));
+    strcpy(item.pfile->name,name);
+    fread(&item.pfile->cpu,sizeof(int),1,file);
+    fread(&item.pfile->mem,sizeof(int),1,file);
+    insertNode(head,newNode(item));
 }
 
-void load_Dir_data(FILE *file,Data *item){
-    fread(&item->dir->numFiles,sizeof(int),1,file);
-    loadData(item->dir->name,item->dir->head,file);
+void load_Dir_data(node **head,char name[10],FILE *file){
+    Data item;
+    item.dir=(Directroy *)malloc(sizeof (Directroy));
+    fread(&item.dir->numFiles,sizeof(int),1,file);
+    strcpy(item.dir->name,name);
+    item.dir->head=NULL;
+    item.dir->pwd=NULL;
+    loadData(name,&item.dir->head,file);
+    insertNode(head,newNode(item));
 }
- char *getEndDirName(char *name){
+char *getEndDirName(char *name){
     char *endName = (char *) malloc(11);
     memset(endName,'\0',11);
     strcpy(endName,"End");
-    for(int i =0;name[i]!='\0'||name[i]!='.'&& i<8;i++){
+    for(int i =0;name[i]!='\0'&&name[i]!='.'&& i<8;i++){
         endName[i+3]=name[i];
     }
-     return endName;
+    return endName;
 }
-void loadData(char *dirname,node *head,FILE *file) {
+void loadData(char *dirname,node **head,FILE *file) {
     //need a loop untill you get to dir end
     Data data;
     char name[11];
     memset(name, '\0', 11);
     char *end = getEndDirName(dirname);
     // data and name diff
-    while (name != end) {
+    while (strcmp(name,end)!=0) {
         fread(name, sizeof(name), 1, file);
         if (name[9] == 't') {
-            strcpy(data.tfile->name, name);
-            load_TextFile_data(file, &data);
+            fixname(name);
+            load_TextFile_data( head,name,file);
         } else if (name[9] == 'p') {
-            strcpy(data.pfile->name, name);
-            load_ProgramFile_data(file, &data);
+            fixname(name);
+            load_ProgramFile_data(head,name,file);
         } else if (name[9] == 'd') {
-            strcpy(data.dir->name, name);
-            load_Dir_data(file, &data);
+            fixname(name);
+            load_Dir_data(head,name,file);
         } else {
-            printf("Error then reading name. data:%s ", name);
+            printf("Error then reading name. data:%s\n", name);
         }
     }
 }
-void loadFile(char *filename, node *head){
+/*void loadFile(char *filename, node *head){
     FILE *file;
-    file=fopen(filename,"rb");
+    file=fopen(filename,"rb+");
     if(file==NULL){
         printf("file doesn't exist");
         exit(-2);
@@ -179,4 +201,4 @@ void loadFile(char *filename, node *head){
     loadData(name,head,file);
 
 
-}
+}*/

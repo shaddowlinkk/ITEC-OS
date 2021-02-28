@@ -134,7 +134,8 @@ void commandInput(Data *dir,char dname[10]){
         }else if(strcmp(command,"printInfo")==0){
             printf("Binary file structure is:\n");
             fseek(file,0,SEEK_SET);
-            saveFile(file,&start);
+            saveFile(file,&start);//todo pull the print from the save
+            fseek(file,0,SEEK_SET);
         }else if(strcmp(command,"cd")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -167,26 +168,37 @@ void commandInput(Data *dir,char dname[10]){
  */
 int main(int argc, char **argv){
     //checking if there is a second arg
+    Data root;
+    root.dir=(Directroy *)malloc(sizeof(Directroy));
     if(argc>=2){
         // opening a file in wb
-       file=fopen(argv[1],"wb");//rb+ <- not that?
+       file=fopen(argv[1],"rb+");//rb+ <- not that?
         if (file==NULL){
-            printf("no file by that name found creating file");
             file=fopen(argv[1],"wb");
+            char name[11]="root.d\0\0\0\0";
+            strcpy(root.dir->name,name);
+            root.dir->head=NULL;
+            root.dir->pwd= malloc(4);
+            strcpy(root.dir->pwd,"root");
+            //start the shell for root dir
+            insertNode(&start,newNode(root));
+            commandInput(&root, root.dir->name);
+            //printing out put for the bin file
+        }else{
+            char name[11];
+            fread(name,sizeof(name),1,file);
+            name[4]=name[8];
+            name[5]=name[9];
+            name[8]='\0';
+            name[9]='\0';
+            load_Dir_data(&start,name,file);
+            fseek(file,0,SEEK_SET);
+            commandInput(&start->item,start->item.dir->name);
         }
-
+        saveFile(file,&start);
         // setting up the root dir
-        Data root;
-        root.dir=(Directroy *)malloc(sizeof(Directroy));
-        char name[11]="root.d\0\0\0\0";
-        strcpy(root.dir->name,name);
-        root.dir->head=NULL;
-        root.dir->pwd= malloc(4);
-        strcpy(root.dir->pwd,"root");
-        //start the shell for root dir
-        insertNode(&start,newNode(root));
-        commandInput(&root, root.dir->name);
-        //printing out put for the bin file
+
+
 
         //saving the file
         //todo pull the prinf functionality from this function mabey not(maybe)
