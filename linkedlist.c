@@ -31,7 +31,7 @@ void insertNode(node **head, node *newNode){
     *trace=newNode;
 }
 
-//todo need to make it so that nameing format is constent
+
 node *findNode(node **head,char name[11]){
     char targetName[8];
     strncpy(targetName,name,8);
@@ -41,16 +41,29 @@ node *findNode(node **head,char name[11]){
         strncpy(curName,(*trace)->item.dir->name,8);
     while ((*trace)&&(strcmp(targetName,curName)!=0)){
         trace = &(*trace)->next;
-        strncpy(curName,(*trace)->item.dir->name,8);
+        if((*trace)) {
+            strncpy(curName, (*trace)->item.dir->name, 8);
+        }
     }
     return (*trace);
 }
 void listNodeNames(node **head){
     node **trace = head;
     while ((*trace)){
-        printf("%s ",(*trace)->item.dir->name);
+        printf("Filename: %s ",(*trace)->item.dir->name);
+        char type =(*trace)->item.dir->name[strlen((*trace)->item.dir->name)-1];
+        switch (type) {
+            case 'p':
+                printf(" Type: Program File\n");
+                break;
+            case 't':
+                printf(" Type: Text File\n");
+                break;
+            case 'd':
+                printf(" Type: Directory\n");
+                break;
+        }
         trace = &(*trace)->next;
     }
-    printf("\n");
 }
 #include "linkedlist.h"

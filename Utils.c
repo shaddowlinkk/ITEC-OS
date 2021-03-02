@@ -18,6 +18,7 @@ int getInt(){
     // the integer that we get
     long data;
     //whare we get the int
+    fflush(stdin);
     while(fgets(buff,sizeof(buff),stdin)){
         data = strtol(buff,&p,10);
         if(p==buff||*p!='\n'){

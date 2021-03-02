@@ -5,6 +5,13 @@
 #include "linkedlist.h"
 #include "FileIO.h"
 #include "Utils.h"
+#ifdef __WIN64
+#include <winsock2.h>
+#else
+#include <sys/select.h>
+#include <unistd.h>
+#endif
+
 // this file is the main running file
 
 
@@ -61,7 +68,7 @@ void createDir(node **head,char name[10],char *pwd){
     name[strlen(name)-1]='\0';
     name[strlen(name)-1]='\0';
     int pwdSize=strlen(name)+strlen(pwd);
-    item.dir->pwd=malloc(pwdSize);
+    item.dir->pwd=(char *)malloc(pwdSize);
     strcpy(item.dir->pwd,pwd);
     strcat(item.dir->pwd,"\\");
     strcat(item.dir->pwd,name);
@@ -70,6 +77,7 @@ void createDir(node **head,char name[10],char *pwd){
     item.dir->numFiles=0;
     insertNode(head,newNode(item));
 }
+
 /**
  *  this function runs the shell for the directory that you are in.
  * @param dir The dir data obj of that  directory.
@@ -79,7 +87,7 @@ void createDir(node **head,char name[10],char *pwd){
 void commandInput(Data *dir,char dname[10]){
     node **head=&dir->dir->head;
     char command[50];
-    int fileCount=0;
+    int fileCount=dir->dir->numFiles;
     while (1){
         dir->dir->numFiles = fileCount;
         if (done){
@@ -89,9 +97,12 @@ void commandInput(Data *dir,char dname[10]){
         char name[11];
         memset(name,'\0', sizeof(name));
         printf("Command@%s>",dname);
+        fflush(stdin);
+        char sc[11];
         scanf("%s",command);
         getchar();
         //what to do the the CreatFile command and do something that for that file type
+        //todo remove ability to make dupe files
         if(strcmp(command,"CreateFile")==0){
             scanf("%s",name);
             if(checkNameComp(name)==0) {
@@ -105,7 +116,7 @@ void commandInput(Data *dir,char dname[10]){
             }else{
                 printf("file name not right");
             }
-            //what to do for he Create Dir command
+            //what to do for the mkdir command
         }else if(strcmp(command,"mkdir")==0){
             //printf("Enter directory name>");
             scanf("%s",name);
@@ -117,6 +128,7 @@ void commandInput(Data *dir,char dname[10]){
                 createDir(head, name,dir->dir->pwd);
                 fileCount++;
             }
+            //what to do for the cat command
         }else if(strcmp(command,"cat")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -127,15 +139,53 @@ void commandInput(Data *dir,char dname[10]){
             node *found=findNode(&dir->dir->head,sc);
             if(found)
                 printf("%s\n",found->item.tfile->text);
+            //what to do for the run command
+        }else if(strcmp(command,"run")==0){
+            char sc[11];
+            memset(sc,'\0', sizeof(sc));
+            scanf("%s",sc);
+            if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
+                strcat(sc, ".p");
+            }
+            node *found=findNode(&dir->dir->head,sc);
+            if(found)
+                printf("running program %s\n",found->item.pfile->name);
+            //what to do for the start command
+        }else if(strcmp(command,"start")==0){
+            char sc[11];
+            memset(sc,'\0', sizeof(sc));
+            scanf("%s",sc);
+            if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
+                strcat(sc, ".p");
+            }
+            node *found=findNode(&dir->dir->head,sc);
+            if(found)
+                printf("starting program %s\n",found->item.pfile->name);
+            //what to do for the step command
+        }else if(strcmp(command,"step")==0){
+            char sc[11];
+            memset(sc,'\0', sizeof(sc));
+            scanf("%s",sc);
+            if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
+                strcat(sc, ".p");
+            }
+            node *found=findNode(&dir->dir->head,sc);
+            if(found)
+                printf("stepinging program %s\n",found->item.pfile->name);
+            //what to do for the ls command
         }else if(strcmp(command,"ls")==0){
+            printf("Directory name:%s\n",dir->dir->name);
             listNodeNames(&dir->dir->head);
+            //what to do for the pwd command
         }else if(strcmp(command,"pwd")==0){
             printf("%s\n",dir->dir->pwd);
+            //what to do for the printInfo command
         }else if(strcmp(command,"printInfo")==0){
             printf("Binary file structure is:\n");
             fseek(file,0,SEEK_SET);
-            saveFile(file,&start);//todo pull the print from the save
+            saveFile(file,&start);
             fseek(file,0,SEEK_SET);
+            //what to do for the cd command
         }else if(strcmp(command,"cd")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -159,49 +209,55 @@ void commandInput(Data *dir,char dname[10]){
             done=1;
             dir->dir->numFiles=fileCount;
             return;
+        }else{
+            printf("no such command as %s\n",command);
         }
     }
 
+}
+void newData(char **argv){
+    Data root;
+    root.dir=(Directroy *)malloc(sizeof(Directroy));
+    file=fopen(argv[1],"wb");
+    char name[11]="root.d\0\0\0\0";
+    strcpy(root.dir->name,name);
+    root.dir->head=NULL;
+    root.dir->pwd= (char *) malloc(4);
+    strcpy(root.dir->pwd,"\\root");
+    //start the shell for root dir
+    insertNode(&start,newNode(root));
+    commandInput(&root, root.dir->name);
 }
 /*
  * the main
  */
 int main(int argc, char **argv){
     //checking if there is a second arg
-    Data root;
-    root.dir=(Directroy *)malloc(sizeof(Directroy));
+
     if(argc>=2){
         // opening a file in wb
        file=fopen(argv[1],"rb+");//rb+ <- not that?
         if (file==NULL){
-            file=fopen(argv[1],"wb");
-            char name[11]="root.d\0\0\0\0";
-            strcpy(root.dir->name,name);
-            root.dir->head=NULL;
-            root.dir->pwd= malloc(4);
-            strcpy(root.dir->pwd,"root");
-            //start the shell for root dir
-            insertNode(&start,newNode(root));
-            commandInput(&root, root.dir->name);
-            //printing out put for the bin file
-        }else{
-            char name[11];
-            fread(name,sizeof(name),1,file);
-            name[4]=name[8];
-            name[5]=name[9];
-            name[8]='\0';
-            name[9]='\0';
-            load_Dir_data(&start,name,file);
-            fseek(file,0,SEEK_SET);
-            commandInput(&start->item,start->item.dir->name);
+            newData(argv);
+        }else {
+            fseek(file, 0, SEEK_END);
+            if (ftell(file) != 0) {
+                fseek(file, 0, SEEK_SET);
+                char name[11];
+                fread(name, sizeof(name), 1, file);
+                name[4] = name[8];
+                name[5] = name[9];
+                name[8] = '\0';
+                name[9] = '\0';
+                load_Dir_data(&start, name, file, "");
+                fseek(file, 0, SEEK_SET);
+                commandInput(&start->item, start->item.dir->name);
+            }else{
+                newData(argv);
+            }
         }
-        saveFile(file,&start);
-        // setting up the root dir
-
-
-
-        //saving the file
-        //todo pull the prinf functionality from this function mabey not(maybe)
+        fclose(stdout);
+            saveFile(file, &start);
     }else{
         // if now promp and ecit programe
         printf("%s","No file specified\n");

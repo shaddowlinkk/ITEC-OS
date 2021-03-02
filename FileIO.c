@@ -110,14 +110,23 @@ void saveFile(FILE *file, node **head){
 }
 
 //--------------------------------file reading (code ignore this)---------------------------------------------------//
-void loadData(char *dirname,node **head,FILE *file);
+void loadData(char *dirname,node **head,FILE *file,char *pwd);
+/**
+ * this function unpads the name that you get from reading the file
+ * @param name the name that you want to unpad
+ */
 void fixname(char name[11]){
     name[4]=name[8];
     name[5]=name[9];
     name[8]='\0';
     name[9]='\0';
 }
-
+/**
+ * this function is used to get the contence from a file for a text file
+ * @param file the file to read from
+ * @param size the size of the contents to get
+ * @return a string of the contents of the file
+ */
 char *getText(FILE *file, int size){
     char *text = (char *) malloc(size);
     memset(text,'\0',sizeof(size));
@@ -126,7 +135,12 @@ char *getText(FILE *file, int size){
     }
     return text;
 }
-
+/**
+ * this function reads in the data from a file if the next data is a text file
+ * @param head the list you want to store in
+ * @param name the name of the text file
+ * @param file the file you want to read from
+ */
 void load_TextFile_data(node **head,char name[10],FILE *file){
     Data item;
     item.tfile=(TextFile *)malloc(sizeof (TextFile));
@@ -137,7 +151,12 @@ void load_TextFile_data(node **head,char name[10],FILE *file){
     strcpy(item.tfile->name,name);
     insertNode(head,newNode(item));
 }
-
+/**
+ * this function reads in the data from a file if the next data is a program file
+ * @param head the list you want ti store in
+ * @param name  the name of the prog file
+ * @param file the file to read from
+ */
 void load_ProgramFile_data(node **head,char name[10],FILE *file){
     Data item;
     item.pfile=(ProgramFile *)malloc(sizeof (ProgramFile));
@@ -146,17 +165,33 @@ void load_ProgramFile_data(node **head,char name[10],FILE *file){
     fread(&item.pfile->mem,sizeof(int),1,file);
     insertNode(head,newNode(item));
 }
-
-void load_Dir_data(node **head,char name[10],FILE *file){
+/**
+ * this function reads in the data from a file if the next data is a dir
+ * @param head the list you want to store in
+ * @param name the name of the dir
+ * @param file the file to read from
+ */
+void load_Dir_data(node **head,char name[10],FILE *file,char *pwd){
     Data item;
     item.dir=(Directroy *)malloc(sizeof (Directroy));
     fread(&item.dir->numFiles,sizeof(int),1,file);
     strcpy(item.dir->name,name);
     item.dir->head=NULL;
-    item.dir->pwd=NULL;
-    loadData(name,&item.dir->head,file);
+    name[strlen(name)-1]='\0';
+    name[strlen(name)-1]='\0';
+    int pwdSize=strlen(name)+strlen(pwd);
+    item.dir->pwd=(char *)malloc(pwdSize);
+    strcpy(item.dir->pwd,pwd);
+    strcat(item.dir->pwd,"\\");
+    strcat(item.dir->pwd,name);
+    loadData(name,&item.dir->head,file,item.dir->pwd);
     insertNode(head,newNode(item));
 }
+/**
+ * get the enddir tag for a dir name
+ * @param name name of dir
+ * @return the end dir tag
+ */
 char *getEndDirName(char *name){
     char *endName = (char *) malloc(11);
     memset(endName,'\0',11);
@@ -166,15 +201,21 @@ char *getEndDirName(char *name){
     }
     return endName;
 }
-void loadData(char *dirname,node **head,FILE *file) {
+/**
+ * this function is used to get all the data in a dir
+ * @param dirname then name if the dir that you are in
+ * @param head the linked list that you what to add the data to
+ * @param file the file you are reading from
+ */
+void loadData(char *dirname,node **head,FILE *file,char *pwd) {
     //need a loop untill you get to dir end
     Data data;
     char name[11];
     memset(name, '\0', 11);
     char *end = getEndDirName(dirname);
     // data and name diff
+    fread(name, sizeof(name), 1, file);
     while (strcmp(name,end)!=0) {
-        fread(name, sizeof(name), 1, file);
         if (name[9] == 't') {
             fixname(name);
             load_TextFile_data( head,name,file);
@@ -183,10 +224,11 @@ void loadData(char *dirname,node **head,FILE *file) {
             load_ProgramFile_data(head,name,file);
         } else if (name[9] == 'd') {
             fixname(name);
-            load_Dir_data(head,name,file);
+            load_Dir_data(head,name,file,pwd);
         } else {
             printf("Error then reading name. data:%s\n", name);
         }
+        fread(name, sizeof(name), 1, file);
     }
 }
 /*void loadFile(char *filename, node *head){
