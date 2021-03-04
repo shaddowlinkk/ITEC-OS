@@ -5,12 +5,6 @@
 #include "linkedlist.h"
 #include "FileIO.h"
 #include "Utils.h"
-#ifdef __WIN64
-#include <winsock2.h>
-#else
-#include <sys/select.h>
-#include <unistd.h>
-#endif
 
 // this file is the main running file
 
@@ -98,7 +92,6 @@ void commandInput(Data *dir,char dname[10]){
         memset(name,'\0', sizeof(name));
         printf("Command@%s>",dname);
         fflush(stdin);
-        char sc[11];
         scanf("%s",command);
         getchar();
         //what to do the the CreatFile command and do something that for that file type
@@ -215,6 +208,10 @@ void commandInput(Data *dir,char dname[10]){
     }
 
 }
+/**
+ * this funtion is used for when now file name exist or the file is empty
+ * @param argv the command line args
+ */
 void newData(char **argv){
     Data root;
     root.dir=(Directroy *)malloc(sizeof(Directroy));
