@@ -98,16 +98,20 @@ void commandInput(Data *dir,char dname[10]){
         //todo remove ability to make dupe files
         if(strcmp(command,"CreateFile")==0){
             scanf("%s",name);
-            if(checkNameComp(name)==0) {
-                char filetypes = name[strlen(name) - 1];
-                if (filetypes == 'p') {
-                    createProgrameFile(head, name);
-                } else if (filetypes == 't') {
-                    createTextFile(head, name);
+            if(!(findNode(&dir->dir->head,name))) {
+                if (checkNameComp(name) == 0) {
+                    char filetypes = name[strlen(name) - 1];
+                    if (filetypes == 'p') {
+                        createProgrameFile(head, name);
+                    } else if (filetypes == 't') {
+                        createTextFile(head, name);
+                    }
+                    fileCount++;
+                }else{
+                    printf("file name not right");
                 }
-                fileCount++;
             }else{
-                printf("file name not right");
+                printf("file already exist\n");
             }
             //what to do for the mkdir command
         }else if(strcmp(command,"mkdir")==0){

@@ -31,7 +31,12 @@ void insertNode(node **head, node *newNode){
     *trace=newNode;
 }
 
-
+/**
+ * this function is used to search the linked list for the name of the file
+ * @param head the head of the list that you want to search
+ * @param name the name of the file that you are looking for
+ * @return a pointer to that node so one can modify it
+ */
 node *findNode(node **head,char name[11]){
     char targetName[8];
     strncpy(targetName,name,8);
@@ -47,6 +52,10 @@ node *findNode(node **head,char name[11]){
     }
     return (*trace);
 }
+/**
+ * this function list all that files that are in a dir linked list
+ * @param head the head of the list that you want to list
+ */
 void listNodeNames(node **head){
     node **trace = head;
     while ((*trace)){
