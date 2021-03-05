@@ -96,7 +96,7 @@ void commandInput(Data *dir,char dname[10]){
         getchar();
         //what to do the the CreatFile command and do something that for that file type
         //todo remove ability to make dupe files
-        if(strcmp(command,"CreateFile")==0){
+        if(strcmp(command,"createFile")==0){
             scanf("%s",name);
             if(!(findNode(&dir->dir->head,name))) {
                 if (checkNameComp(name) == 0) {
