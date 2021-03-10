@@ -109,17 +109,19 @@ void saveFile(FILE *file, node **head){
 
 }
 
-//--------------------------------file reading (code ignore this)---------------------------------------------------//
 void loadData(char *dirname,node **head,FILE *file,char *pwd);
 /**
  * this function unpads the name that you get from reading the file
  * @param name the name that you want to unpad
  */
 void fixname(char name[11]){
-    name[4]=name[8];
-    name[5]=name[9];
+    char t1,t2;
+    t1=name[8];
+    t2=name[9];
     name[8]='\0';
     name[9]='\0';
+    name[strlen(name)]=t1;
+    name[strlen(name)]=t2;
 }
 /**
  * this function is used to get the contence from a file for a text file
@@ -131,7 +133,9 @@ char *getText(FILE *file, int size){
     char *text = (char *) malloc(size);
     memset(text,'\0',sizeof(size));
     for (int i=0;i<size;i++){
-        fread(&text[i],sizeof(char),1,file);
+        char tmp='\0';
+        fread(&tmp,sizeof(char),1,file);
+        strncat(text,&tmp,1);
     }
     return text;
 }

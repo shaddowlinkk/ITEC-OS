@@ -12,7 +12,7 @@
  */
 node *newNode(Data item){
     node *newNode;
-    newNode = (node *) malloc(sizeof (Data));
+    newNode = (node *) malloc(sizeof (node));
     newNode->item=item;
     newNode->next=NULL;
     return newNode;
@@ -38,10 +38,13 @@ void insertNode(node **head, node *newNode){
  * @return a pointer to that node so one can modify it
  */
 node *findNode(node **head,char name[11]){
-    char targetName[8];
+    char targetName[11];
+    memset(targetName,'\0',11);
     strncpy(targetName,name,8);
     node **trace = head;
-    char curName[8];
+    char curName[11];
+    memset(curName,'\0',11);
+
     if((*trace))
         strncpy(curName,(*trace)->item.dir->name,8);
     while ((*trace)&&(strcmp(targetName,curName)!=0)){
