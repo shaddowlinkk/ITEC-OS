@@ -10,11 +10,11 @@ typedef struct _textFile{
     int size;
     char *text;//needs freed
 }TextFile;
-typedef struct _programFile{
+/*typedef struct _programFile{
     char name[11];
     int cpu;
     int mem;
-}ProgramFile;
+}ProgramFile;*/
 typedef struct _directroy {
     char name[11];
     int numFiles;
@@ -31,16 +31,19 @@ typedef struct _simnode{
 }SimNode;
 typedef union _data{
     Directroy *dir;
-    ProgramFile *pfile;
+   // ProgramFile *pfile;
     TextFile *tfile;
     SimNode *SimNode;
 }Data;
-typedef struct _simenvio{
+typedef struct _simenviro{
     int time;
     struct _node *queue;
     struct _node *IO;
     struct _node *finished;
     int burst;
+    int mem;
+    int usemem;
+    int stop;
 }SimEnviro;
 typedef struct _node {
     Data item;

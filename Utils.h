@@ -7,5 +7,6 @@
 void getName(char name[10]);
 void getDirName(char name[8]);
 int checkNameComp(char tmp[11]);
+int getVal(char data[20]);
 int getInt();
 #endif //ITEC371_UTILS_H

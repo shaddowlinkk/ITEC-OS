@@ -51,6 +51,32 @@ int checkNameComp(char name[11]){
     return 0;
 }
 
+/**
+ * this funstion get the valuse used in addporgram
+ * @param data the data from input
+ * @return the number potions
+ */
+int getVal(char data[20]) {
+
+    int i, d;
+    char c=0;
+    for (i = 0; data[i] != 32&&data[i]!='\n'; ++i) {
+        c = data[i];
+        if(data[i]!='\n') {
+            data[i] = 58;
+        }
+    }
+    if(data[i]!='\n') {
+        data[i] = 58;
+    }
+    if (c>=48&&c<=57){
+        //data[i-1]=58;
+        return atoi(&c);
+    } else{
+        return -1;
+    }
+}
+
 //------------------------------ these functions have deprecated and should not be used-------------------------------//
 void getName(char name[10]) {
     static char tmp[12];

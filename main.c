@@ -12,6 +12,7 @@
 // tells when the program is done
 int done=0;
 node *start=NULL;
+INIT_SIMULATION_ENVIRONMENT(enviro);
 FILE *file;
 void  commandInput(Data *dir,char dname[10]);
 /**
@@ -32,19 +33,25 @@ void createTextFile(node **head,char name[10]){
   //  return item;
     insertNode(head,newNode(item));
 }
+
 /**
  * This function create  program file for the linked lisk using the data union
  * @param head The start the list that you are reading.
  * @param name The name of the file you want to make.
  */
-void createProgrameFile(node **head,char name[10]){
+void createProgrameFile(node **head,char name[10],char data[20]){
     Data item;
-    item.pfile=(ProgramFile *)malloc(sizeof (ProgramFile));
-    strcpy(item.pfile->name,name);
-    printf("Enter CPU requirements>");
-    item.pfile->cpu=getInt();
-    printf("Enter memory requirements>");
-    item.pfile->mem=getInt();
+    item.SimNode=(SimNode *)malloc(sizeof (SimNode));
+    strcpy(item.SimNode->name,name);
+    item.SimNode->timeran=0;
+    item.SimNode->time=getVal(data);
+    item.SimNode->mem=getVal(data);
+    if(item.SimNode->mem==-1||item.SimNode->time==-1){
+        printf("not valid addProgram uses\n");
+        return;
+    }
+    item.SimNode->timeStartIO=getVal(data);
+    item.SimNode->timeNeedIO=getVal(data);
     insertNode(head,newNode(item));
 }
 /**
@@ -101,14 +108,12 @@ void commandInput(Data *dir,char dname[10]){
             if(!(findNode(&dir->dir->head,name))) {
                 if (checkNameComp(name) == 0) {
                     char filetypes = name[strlen(name) - 1];
-                    if (filetypes == 'p') {
-                        createProgrameFile(head, name);
-                    } else if (filetypes == 't') {
+                     if (filetypes == 't') {
                         createTextFile(head, name);
                     }
                     fileCount++;
                 }else{
-                    printf("file name not right");
+                    printf("file name not right\n");
                 }
             }else{
                 printf("file already exist\n");
@@ -126,6 +131,28 @@ void commandInput(Data *dir,char dname[10]){
                 fileCount++;
             }
             //what to do for the cat command
+        }else if(strcmp(command,"addProgram")==0){
+            //printf("Enter directory name>");
+            char buffer[20];
+            char *b = buffer;
+            fgets(b,20,stdin);
+            char name[11];
+            memset(name,'\0', sizeof(name));
+            int i = 0;
+            for (; buffer[i]!=32; ++i) {
+                strncat(name,&(buffer[i]),1);
+                buffer[i]=58;
+            }
+            buffer[i]=58;
+            if (checkNameComp(name) == 2 && strlen(name) <= 8) {
+                strcat(name, ".p");
+            }
+            //chacking that the .d got in the file name my need to remove
+            if(checkNameComp(name)==0) {
+                createProgrameFile(head,name,buffer);
+                fileCount++;
+            }
+            //what to do for the cat command
         }else if(strcmp(command,"cat")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -138,16 +165,13 @@ void commandInput(Data *dir,char dname[10]){
                 printf("%s\n",found->item.tfile->text);
             //what to do for the run command
         }else if(strcmp(command,"run")==0){
-            char sc[11];
-            memset(sc,'\0', sizeof(sc));
-            scanf("%s",sc);
-            if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
-                strcat(sc, ".p");
+            if(enviro.burst!=0) {
+                simrun(&enviro);
+            }else{
+                printf("no burst set\n");
             }
-            node *found=findNode(&dir->dir->head,sc);
-            if(found)
-                printf("running program %s\n",found->item.pfile->name);
-            //what to do for the start command
+        }else if(strcmp(command,"getMemory")==0){
+            printf("System mem:%d\n",enviro.mem);
         }else if(strcmp(command,"start")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -157,24 +181,32 @@ void commandInput(Data *dir,char dname[10]){
             }
             node *found=findNode(&dir->dir->head,sc);
             if(found) {
-                printf("starting program %s\n", found->item.pfile->name);
-                char buffer[32];
-                char *b = buffer;
-                fgets(b,32,stdin);
-                //use this for setprogram input
-                printf(":%s:\n",b);
+                if((enviro.usemem-found->item.SimNode->mem)>=0) {
+                    enviro.usemem-=found->item.SimNode->mem;
+                    insertNode(&enviro.queue, newNode(found->item));
+                } else{
+                    printf("not enough mem\n");
+                }
             }
             //what to do for the step command
         }else if(strcmp(command,"step")==0){
-            char sc[11];
-            memset(sc,'\0', sizeof(sc));
-            scanf("%s",sc);
-            if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
-                strcat(sc, ".p");
+            int step;
+            scanf("%d", &step);
+            if(enviro.burst!=0) {
+                stepTill(&enviro, step);
+            }else{
+                printf("no burst set\n");
             }
-            node *found=findNode(&dir->dir->head,sc);
-            if(found)
-                printf("stepinging program %s\n",found->item.pfile->name);
+        }else if(strcmp(command,"setBurst")==0) {
+            int burst;
+            scanf("%d", &burst);
+            enviro.burst=burst;
+            //what to do for the ls command
+        }else if(strcmp(command,"setMemory")==0) {
+            int mem;
+            scanf("%d", &mem);
+            enviro.mem=mem;
+            enviro.usemem=mem;
             //what to do for the ls command
         }else if(strcmp(command,"ls")==0){
             printf("Directory name:%s\n",dir->dir->name);
@@ -240,27 +272,37 @@ void newData(char **argv){
  */
 int main(int argc, char **argv){
     //checking if there is a second arg
-    INIT_SIMULATION_ENVIRONMENT(enviro);
-    Data test;
+
+/*    Data test;
     test.SimNode= (SimNode *)malloc(sizeof(SimNode));
-    strcpy(test.SimNode->name,"testing");
-    test.SimNode->time=2;
+    strcpy(test.SimNode->name,"testing2");
+    test.SimNode->time=4;
     test.SimNode->timeran=0;
     test.SimNode->mem=1;
     test.SimNode->timeStartIO=-1;
     test.SimNode->timeNeedIO=0;
     Data ttest;
     ttest.SimNode= (SimNode *)malloc(sizeof(SimNode));
-    strcpy(test.SimNode->name,"testing");
+    strcpy(ttest.SimNode->name,"testing1");
     ttest.SimNode->time=4;
     ttest.SimNode->timeran=0;
     ttest.SimNode->mem=1;
-    ttest.SimNode->timeStartIO=-1;
-    ttest.SimNode->timeNeedIO=2;
+    ttest.SimNode->timeStartIO=1;
+    ttest.SimNode->timeNeedIO=1;
+    Data est;
+    est.SimNode= (SimNode *)malloc(sizeof(SimNode));
+    strcpy(est.SimNode->name,"testing3");
+    est.SimNode->time=2;
+    est.SimNode->timeran=0;
+    est.SimNode->mem=1;
+    est.SimNode->timeStartIO=-1;
+    est.SimNode->timeNeedIO=0;
     insertNode(&enviro.queue,newNode(ttest));
     insertNode(&enviro.queue,newNode(test));
-    enviro.burst=2;
-    stepTill(&enviro,0);
+    insertNode(&enviro.queue,newNode(est));
+    enviro.burst=4;
+    stepTill(&enviro,7);
+    simrun(&enviro);*/
 /*    setBurst(2);
     //queueadd(newNode(test));
     queueadd(newNode(ttest));*/

@@ -41,7 +41,11 @@ node *popnode(node **head){
     (*tmp).next=NULL;
     return (tmp);
 }
-
+/**
+ *  this function is used to put a node at the begining of the list
+ * @param head the head of the list that you want to add to
+ * @param node the node that you want to add
+ */
 void pushToTop(node **head, node *node){
     node->next=(*head);
     (*head)=node;
