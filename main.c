@@ -5,7 +5,7 @@
 #include "linkedlist.h"
 #include "FileIO.h"
 #include "Utils.h"
-
+#include "Simulator.h"
 // this file is the main running file
 
 
@@ -156,8 +156,14 @@ void commandInput(Data *dir,char dname[10]){
                 strcat(sc, ".p");
             }
             node *found=findNode(&dir->dir->head,sc);
-            if(found)
-                printf("starting program %s\n",found->item.pfile->name);
+            if(found) {
+                printf("starting program %s\n", found->item.pfile->name);
+                char buffer[32];
+                char *b = buffer;
+                fgets(b,32,stdin);
+                //use this for setprogram input
+                printf(":%s:\n",b);
+            }
             //what to do for the step command
         }else if(strcmp(command,"step")==0){
             char sc[11];
@@ -234,7 +240,44 @@ void newData(char **argv){
  */
 int main(int argc, char **argv){
     //checking if there is a second arg
+    INIT_SIMULATION_ENVIRONMENT(enviro);
+    Data test;
+    test.SimNode= (SimNode *)malloc(sizeof(SimNode));
+    strcpy(test.SimNode->name,"testing");
+    test.SimNode->time=2;
+    test.SimNode->timeran=0;
+    test.SimNode->mem=1;
+    test.SimNode->timeStartIO=-1;
+    test.SimNode->timeNeedIO=0;
+    Data ttest;
+    ttest.SimNode= (SimNode *)malloc(sizeof(SimNode));
+    strcpy(test.SimNode->name,"testing");
+    ttest.SimNode->time=4;
+    ttest.SimNode->timeran=0;
+    ttest.SimNode->mem=1;
+    ttest.SimNode->timeStartIO=-1;
+    ttest.SimNode->timeNeedIO=2;
+    insertNode(&enviro.queue,newNode(ttest));
+    insertNode(&enviro.queue,newNode(test));
+    enviro.burst=2;
+    stepTill(&enviro,0);
+/*    setBurst(2);
+    //queueadd(newNode(test));
+    queueadd(newNode(ttest));*/
+    //simrun(&enviro);
 
+/*    node *test=NULL;
+    Data one,two,three;
+    one.testing=1;
+    two.testing=2;
+    three.testing=3;
+    insertNode(&test,newNode(one));
+    insertNode(&test,newNode(two));
+    insertNode(&test,newNode(three));
+    node *cur=NULL;
+    cur=popnode(&test);
+    insertNode(&test,cur);
+    cur=NULL;*/
     if(argc>=2){
         // opening a file in wb
        file=fopen(argv[1],"rb+");//rb+ <- not that?

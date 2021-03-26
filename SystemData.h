@@ -21,12 +21,27 @@ typedef struct _directroy {
     char *pwd;
     struct _node *head;
 }Directroy;
+typedef struct _simnode{
+    char name[11];
+    int time;
+    int timeran;
+    int mem;
+    int timeStartIO;
+    int timeNeedIO;
+}SimNode;
 typedef union _data{
     Directroy *dir;
     ProgramFile *pfile;
     TextFile *tfile;
+    SimNode *SimNode;
 }Data;
-
+typedef struct _simenvio{
+    int time;
+    struct _node *queue;
+    struct _node *IO;
+    struct _node *finished;
+    int burst;
+}SimEnviro;
 typedef struct _node {
     Data item;
     struct _node *next;

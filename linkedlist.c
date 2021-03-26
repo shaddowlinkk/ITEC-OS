@@ -30,6 +30,22 @@ void insertNode(node **head, node *newNode){
     newNode->next= *trace;
     *trace=newNode;
 }
+/**
+ * this function returnes the fist node and moves the head down one
+ * @param head the head of th list that you want to mode
+ * @return
+ */
+node *popnode(node **head){
+    node *tmp=(*head);
+    (*head)=(*head)->next;
+    (*tmp).next=NULL;
+    return (tmp);
+}
+
+void pushToTop(node **head, node *node){
+    node->next=(*head);
+    (*head)=node;
+}
 
 /**
  * this function is used to search the linked list for the name of the file
@@ -78,4 +94,3 @@ void listNodeNames(node **head){
         trace = &(*trace)->next;
     }
 }
-#include "linkedlist.h"

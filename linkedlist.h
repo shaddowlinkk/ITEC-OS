@@ -8,6 +8,8 @@
 void removeNode(node ** item);
 void insertNode(node **head, node *newNode);
 node *newNode(Data item);
+node *popnode(node **head);
+void pushToTop(node **head, node *node);
 void listNodeNames(node **head);
 node *findNode(node **head,char name[11]);
 

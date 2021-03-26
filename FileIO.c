@@ -139,6 +139,7 @@ char *getText(FILE *file, int size){
     }
     return text;
 }
+
 /**
  * this function reads in the data from a file if the next data is a text file
  * @param head the list you want to store in
@@ -155,6 +156,7 @@ void load_TextFile_data(node **head,char name[10],FILE *file){
     strcpy(item.tfile->name,name);
     insertNode(head,newNode(item));
 }
+
 /**
  * this function reads in the data from a file if the next data is a program file
  * @param head the list you want ti store in
@@ -169,6 +171,7 @@ void load_ProgramFile_data(node **head,char name[10],FILE *file){
     fread(&item.pfile->mem,sizeof(int),1,file);
     insertNode(head,newNode(item));
 }
+
 /**
  * this function reads in the data from a file if the next data is a dir
  * @param head the list you want to store in
@@ -191,6 +194,7 @@ void load_Dir_data(node **head,char name[10],FILE *file,char *pwd){
     loadData(name,&item.dir->head,file,item.dir->pwd);
     insertNode(head,newNode(item));
 }
+
 /**
  * get the enddir tag for a dir name
  * @param name name of dir
@@ -205,6 +209,7 @@ char *getEndDirName(char *name){
     }
     return endName;
 }
+
 /**
  * this function is used to get all the data in a dir
  * @param dirname then name if the dir that you are in
@@ -235,16 +240,3 @@ void loadData(char *dirname,node **head,FILE *file,char *pwd) {
         fread(name, sizeof(name), 1, file);
     }
 }
-/*void loadFile(char *filename, node *head){
-    FILE *file;
-    file=fopen(filename,"rb+");
-    if(file==NULL){
-        printf("file doesn't exist");
-        exit(-2);
-    }
-    char name[11];
-    fread(name,sizeof(name),1,file);
-    loadData(name,head,file);
-
-
-}*/
