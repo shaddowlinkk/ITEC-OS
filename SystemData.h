@@ -33,7 +33,7 @@ typedef union _data{
     Directroy *dir;
    // ProgramFile *pfile;
     TextFile *tfile;
-    SimNode *SimNode;
+    SimNode *simNode;
 }Data;
 typedef struct _simenviro{
     int time;

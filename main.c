@@ -12,7 +12,7 @@
 // tells when the program is done
 int done=0;
 node *start=NULL;
-INIT_SIMULATION_ENVIRONMENT(enviro);
+SimEnviro enviro;
 FILE *file;
 void  commandInput(Data *dir,char dname[10]);
 /**
@@ -41,17 +41,17 @@ void createTextFile(node **head,char name[10]){
  */
 void createProgrameFile(node **head,char name[10],char data[20]){
     Data item;
-    item.SimNode=(SimNode *)malloc(sizeof (SimNode));
-    strcpy(item.SimNode->name,name);
-    item.SimNode->timeran=0;
-    item.SimNode->time=getVal(data);
-    item.SimNode->mem=getVal(data);
-    if(item.SimNode->mem==-1||item.SimNode->time==-1){
+    item.simNode=(SimNode *)malloc(sizeof (SimNode));
+    strcpy(item.simNode->name, name);
+    item.simNode->timeran=0;
+    item.simNode->time=getVal(data);
+    item.simNode->mem=getVal(data);
+    if(item.simNode->mem == -1 || item.simNode->time == -1){
         printf("not valid addProgram uses\n");
         return;
     }
-    item.SimNode->timeStartIO=getVal(data);
-    item.SimNode->timeNeedIO=getVal(data);
+    item.simNode->timeStartIO=getVal(data);
+    item.simNode->timeNeedIO=getVal(data);
     insertNode(head,newNode(item));
 }
 /**
@@ -139,7 +139,7 @@ void commandInput(Data *dir,char dname[10]){
             char name[11];
             memset(name,'\0', sizeof(name));
             int i = 0;
-            for (; buffer[i]!=32; ++i) {
+            for (; buffer[i]!=32&&buffer[i]!='\n'; ++i) {
                 strncat(name,&(buffer[i]),1);
                 buffer[i]=58;
             }
@@ -164,14 +164,17 @@ void commandInput(Data *dir,char dname[10]){
             if(found)
                 printf("%s\n",found->item.tfile->text);
             //what to do for the run command
+            //runs the enviroment
         }else if(strcmp(command,"run")==0){
             if(enviro.burst!=0) {
+
                 simrun(&enviro);
             }else{
                 printf("no burst set\n");
             }
         }else if(strcmp(command,"getMemory")==0){
             printf("System mem:%d\n",enviro.mem);
+            //addes a program to the enviroment
         }else if(strcmp(command,"start")==0){
             char sc[11];
             memset(sc,'\0', sizeof(sc));
@@ -181,9 +184,17 @@ void commandInput(Data *dir,char dname[10]){
             }
             node *found=findNode(&dir->dir->head,sc);
             if(found) {
-                if((enviro.usemem-found->item.SimNode->mem)>=0) {
-                    enviro.usemem-=found->item.SimNode->mem;
-                    insertNode(&enviro.queue, newNode(found->item));
+                if((enviro.usemem-found->item.simNode->mem) >= 0) {
+                    enviro.usemem-=found->item.simNode->mem;
+                    Data item;
+                    item.simNode=(SimNode *)malloc(sizeof (SimNode));
+                    item.simNode->time=found->item.simNode->time;
+                    item.simNode->timeran=0;
+                    strcpy(item.simNode->name,found->item.simNode->name);
+                    item.simNode->mem=found->item.simNode->mem;
+                    item.simNode->timeNeedIO=found->item.simNode->timeNeedIO;
+                    item.simNode->timeStartIO=found->item.simNode->timeStartIO;
+                    insertNode(&enviro.queue, newNode(item));
                 } else{
                     printf("not enough mem\n");
                 }
@@ -197,11 +208,12 @@ void commandInput(Data *dir,char dname[10]){
             }else{
                 printf("no burst set\n");
             }
+            //this sets burs time
         }else if(strcmp(command,"setBurst")==0) {
             int burst;
             scanf("%d", &burst);
             enviro.burst=burst;
-            //what to do for the ls command
+            //sets the envrimment mem liomit
         }else if(strcmp(command,"setMemory")==0) {
             int mem;
             scanf("%d", &mem);
@@ -272,54 +284,15 @@ void newData(char **argv){
  */
 int main(int argc, char **argv){
     //checking if there is a second arg
+    enviro.time=0;
+    enviro.stop=0;
+    enviro.queue=NULL;
+    enviro.IO=NULL;
+    enviro.finished=NULL;
+    enviro.mem=0;
+    enviro.burst=0;
+    enviro.usemem=0;
 
-/*    Data test;
-    test.SimNode= (SimNode *)malloc(sizeof(SimNode));
-    strcpy(test.SimNode->name,"testing2");
-    test.SimNode->time=4;
-    test.SimNode->timeran=0;
-    test.SimNode->mem=1;
-    test.SimNode->timeStartIO=-1;
-    test.SimNode->timeNeedIO=0;
-    Data ttest;
-    ttest.SimNode= (SimNode *)malloc(sizeof(SimNode));
-    strcpy(ttest.SimNode->name,"testing1");
-    ttest.SimNode->time=4;
-    ttest.SimNode->timeran=0;
-    ttest.SimNode->mem=1;
-    ttest.SimNode->timeStartIO=1;
-    ttest.SimNode->timeNeedIO=1;
-    Data est;
-    est.SimNode= (SimNode *)malloc(sizeof(SimNode));
-    strcpy(est.SimNode->name,"testing3");
-    est.SimNode->time=2;
-    est.SimNode->timeran=0;
-    est.SimNode->mem=1;
-    est.SimNode->timeStartIO=-1;
-    est.SimNode->timeNeedIO=0;
-    insertNode(&enviro.queue,newNode(ttest));
-    insertNode(&enviro.queue,newNode(test));
-    insertNode(&enviro.queue,newNode(est));
-    enviro.burst=4;
-    stepTill(&enviro,7);
-    simrun(&enviro);*/
-/*    setBurst(2);
-    //queueadd(newNode(test));
-    queueadd(newNode(ttest));*/
-    //simrun(&enviro);
-
-/*    node *test=NULL;
-    Data one,two,three;
-    one.testing=1;
-    two.testing=2;
-    three.testing=3;
-    insertNode(&test,newNode(one));
-    insertNode(&test,newNode(two));
-    insertNode(&test,newNode(three));
-    node *cur=NULL;
-    cur=popnode(&test);
-    insertNode(&test,cur);
-    cur=NULL;*/
     if(argc>=2){
         // opening a file in wb
        file=fopen(argv[1],"rb+");//rb+ <- not that?

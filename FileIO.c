@@ -85,11 +85,11 @@ void write_porg_data(FILE *file,node **pNode){
     printf("%li: Filename %s\n",ftell(file),(*pNode)->item.dir->name);
     printf("Type: program file\n");
     writeName(file, (*pNode)->item.tfile->name, 'p');
-    printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n", ftell(file), (*pNode)->item.SimNode->time, (*pNode)->item.SimNode->mem);
-    fwrite(&(*pNode)->item.SimNode->time, sizeof(int), 1, file);
-    fwrite(&(*pNode)->item.SimNode->mem, sizeof(int), 1, file);
-    fwrite(&(*pNode)->item.SimNode->timeStartIO, sizeof(int), 1, file);
-    fwrite(&(*pNode)->item.SimNode->timeNeedIO, sizeof(int), 1, file);
+    printf("%li: Contents: CPU Requirement: %d,Memory Requirement:%i\n", ftell(file), (*pNode)->item.simNode->time, (*pNode)->item.simNode->mem);
+    fwrite(&(*pNode)->item.simNode->time, sizeof(int), 1, file);
+    fwrite(&(*pNode)->item.simNode->mem, sizeof(int), 1, file);
+    fwrite(&(*pNode)->item.simNode->timeStartIO, sizeof(int), 1, file);
+    fwrite(&(*pNode)->item.simNode->timeNeedIO, sizeof(int), 1, file);
 }
 /**
  * saves the data of a dir to a bin file
@@ -167,13 +167,13 @@ void load_TextFile_data(node **head,char name[10],FILE *file){
  */
 void load_ProgramFile_data(node **head,char name[10],FILE *file){
     Data item;
-    item.SimNode=(SimNode *)malloc(sizeof (SimNode));
-    strcpy(item.SimNode->name,name);
-    fread(&item.SimNode->time,sizeof(int),1,file);
-    fread(&item.SimNode->mem,sizeof(int),1,file);
-    fread(&item.SimNode->timeStartIO,sizeof(int),1,file);
-    fread(&item.SimNode->timeNeedIO,sizeof(int),1,file);
-    item.SimNode->timeran=0;
+    item.simNode=(SimNode *)malloc(sizeof (SimNode));
+    strcpy(item.simNode->name, name);
+    fread(&item.simNode->time, sizeof(int), 1, file);
+    fread(&item.simNode->mem, sizeof(int), 1, file);
+    fread(&item.simNode->timeStartIO, sizeof(int), 1, file);
+    fread(&item.simNode->timeNeedIO, sizeof(int), 1, file);
+    item.simNode->timeran=0;
     insertNode(head,newNode(item));
 }
 
