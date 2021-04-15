@@ -14,6 +14,18 @@ node **findFinishIO(node **head,int systime);
 node **findStartIO(node **head,int timeIO);
 void printReport(node *working,SimEnviro *enviro);
 void checkFinishdeIO(SimEnviro *enviro);
+int getSysMem(node **head){
+    node *last;
+    node **tracer= head;
+    while ((*tracer)){
+        if((*tracer)->item.simNode->inVMem==0){
+            last=(*tracer);
+        }
+        tracer=&(*tracer)->next;
+    }
+    last->item.simNode->inVMem=1;
+    return last->item.simNode->mem;
+}
 /**
  * this runs on burst to keep track of time
  * @param working the node to be worked on
@@ -22,8 +34,17 @@ void checkFinishdeIO(SimEnviro *enviro);
  */
 void runburst(node *working, SimEnviro *enviro,int stopStep){
     printReport(working,enviro);
+    int memGet=0;
+    if(working&&working->item.simNode->inVMem==1) {
+        while ((enviro->usemem - working->item.simNode->mem) < 0) {
+            enviro->usemem += getSysMem(&enviro->queue);
+        }
+        working->item.simNode->inVMem = 0;
+        enviro->usemem -= working->item.simNode->mem;
+        memGet = 2;
+    }
     for (int i = 0; i < enviro->burst; ++i) {
-        if(working) {
+        if(working&&(memGet==0)) {
             if (working->item.simNode->timeran == working->item.simNode->timeStartIO) {
                 working->item.simNode->timeNeedIO += enviro->time;
                 working->item.simNode->timeStartIO=-1;
@@ -44,11 +65,14 @@ void runburst(node *working, SimEnviro *enviro,int stopStep){
             if (working->item.simNode->time == working->item.simNode->timeran) {
                 working->item.simNode->time = enviro->time;
                 insertNode(&enviro->finished, working);
+                enviro->usemem+=working->item.simNode->mem;
                 //printf("\tfinished:%s<%d>",working->item.simNode->name,enviro->time);
                 working = NULL;
                 return;
             }
         }else{
+            if(memGet!=0)
+                memGet--;
             enviro->time++;
         }
         node **found=findFinishIO(&enviro->IO,enviro->time);
@@ -145,8 +169,12 @@ void printReport(node *working,SimEnviro *enviro){
     node **trace =&enviro->queue;
     int pos=1;
     printf("the queue is:\n");
+    //add new line for vm mem
     while ((*trace)){
-        printf("\tPosition %d: job %s has %d units left and is useing %d memory resources.\n", pos, (*trace)->item.simNode->name, ((*trace)->item.simNode->time - (*trace)->item.simNode->timeran), (*trace)->item.simNode->mem);
+        if((*trace)->item.simNode->inVMem==1)
+            printf("\tPosition %d: job %s has %d units left and is useing %d resource on disk.\n", pos, (*trace)->item.simNode->name, ((*trace)->item.simNode->time - (*trace)->item.simNode->timeran), (*trace)->item.simNode->mem);
+        else
+            printf("\tPosition %d: job %s has %d units left and is useing %d memory resources.\n", pos, (*trace)->item.simNode->name, ((*trace)->item.simNode->time - (*trace)->item.simNode->timeran), (*trace)->item.simNode->mem);
         pos++;
         trace=&(*trace)->next;
     }

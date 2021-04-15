@@ -9,6 +9,7 @@
 #endif //ITEC371_SIMULATOR_H
 void simrun(SimEnviro *enviro);
 void stepTill(SimEnviro *enviro, int stopStep);
+int getSysMem(node **head);
 /*
 void queueadd(node *data);
 void setBurst(int data);*/

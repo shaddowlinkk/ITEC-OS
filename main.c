@@ -44,6 +44,7 @@ void createProgrameFile(node **head,char name[10],char data[20]){
     item.simNode=(SimNode *)malloc(sizeof (SimNode));
     strcpy(item.simNode->name, name);
     item.simNode->timeran=0;
+    item.simNode->inVMem=0;
     item.simNode->time=getVal(data);
     item.simNode->mem=getVal(data);
     if(item.simNode->mem == -1 || item.simNode->time == -1){
@@ -175,29 +176,41 @@ void commandInput(Data *dir,char dname[10]){
         }else if(strcmp(command,"getMemory")==0){
             printf("System mem:%d\n",enviro.mem);
             //addes a program to the enviroment
-        }else if(strcmp(command,"start")==0){
+        }else if(strcmp(command,"start")==0) {
             char sc[11];
-            memset(sc,'\0', sizeof(sc));
-            scanf("%s",sc);
+            memset(sc, '\0', sizeof(sc));
+            scanf("%s", sc);
             if (checkNameComp(sc) == 2 && strlen(sc) <= 8) {
                 strcat(sc, ".p");
             }
-            node *found=findNode(&dir->dir->head,sc);
-            if(found) {
-                if((enviro.usemem-found->item.simNode->mem) >= 0) {
-                    enviro.usemem-=found->item.simNode->mem;
+            if (enviro.mem>0) {
+                node *found = findNode(&dir->dir->head, sc);
+                if (found) {
+                    //todo change mem chack
                     Data item;
-                    item.simNode=(SimNode *)malloc(sizeof (SimNode));
-                    item.simNode->time=found->item.simNode->time;
-                    item.simNode->timeran=0;
-                    strcpy(item.simNode->name,found->item.simNode->name);
-                    item.simNode->mem=found->item.simNode->mem;
-                    item.simNode->timeNeedIO=found->item.simNode->timeNeedIO;
-                    item.simNode->timeStartIO=found->item.simNode->timeStartIO;
-                    insertNode(&enviro.queue, newNode(item));
-                } else{
-                    printf("not enough mem\n");
+                    item.simNode = (SimNode *) malloc(sizeof(SimNode));
+                    item.simNode->time = found->item.simNode->time;
+                    item.simNode->inVMem = found->item.simNode->inVMem;
+                    item.simNode->timeran = 0;
+                    strcpy(item.simNode->name, found->item.simNode->name);
+                    item.simNode->mem = found->item.simNode->mem;
+                    item.simNode->timeNeedIO = found->item.simNode->timeNeedIO;
+                    item.simNode->timeStartIO = found->item.simNode->timeStartIO;
+
+                    if ((enviro.usemem - found->item.simNode->mem) >= 0) {
+                        enviro.usemem -= found->item.simNode->mem;
+                        insertNode(&enviro.queue, newNode(item));
+                    } else {
+                        enviro.usemem += getSysMem(&enviro.queue);
+                        while ((enviro.usemem - found->item.simNode->mem) < 0) {
+                            enviro.usemem += getSysMem(&enviro.queue);
+                        }
+                        enviro.usemem -= found->item.simNode->mem;
+                        insertNode(&enviro.queue, newNode(item));
+                    }
                 }
+            }else{
+                printf("thare is no system memory to start program");
             }
             //what to do for the step command
         }else if(strcmp(command,"step")==0){

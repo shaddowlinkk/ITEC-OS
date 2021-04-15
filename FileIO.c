@@ -174,6 +174,7 @@ void load_ProgramFile_data(node **head,char name[10],FILE *file){
     fread(&item.simNode->timeStartIO, sizeof(int), 1, file);
     fread(&item.simNode->timeNeedIO, sizeof(int), 1, file);
     item.simNode->timeran=0;
+    item.simNode->inVMem=0;
     insertNode(head,newNode(item));
 }
 

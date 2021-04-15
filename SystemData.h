@@ -24,6 +24,7 @@ typedef struct _directroy {
 typedef struct _simnode{
     char name[11];
     int time;
+    int inVMem;
     int timeran;
     int mem;
     int timeStartIO;

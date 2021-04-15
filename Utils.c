@@ -39,12 +39,12 @@ int checkNameComp(char name[11]){
     char tmp[11];
     memset(tmp,'\0',sizeof(tmp));
     strcpy(tmp,name);
-     if(strlen(tmp) <= 3){
+/*     if(strlen(tmp) <= 3){
         memset(tmp, '\0', sizeof(tmp));
          return 1;
-    }
+    }*/
         //check the file type ie .t is a valid type
-    else if((strchr(filetypes, tmp[strlen(tmp) - 1]) == NULL) || (tmp[strlen(tmp) - 2] != '.')) {
+   if((strchr(filetypes, tmp[strlen(tmp) - 1]) == NULL) || (tmp[strlen(tmp) - 2] != '.')) {
         memset(tmp, '\0', sizeof(tmp));
          return 2;
     }
