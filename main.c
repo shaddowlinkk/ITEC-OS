@@ -210,7 +210,7 @@ void commandInput(Data *dir,char dname[10]){
                     }
                 }
             }else{
-                printf("thare is no system memory to start program");
+                printf("thare is no system memory to start program\n");
             }
             //what to do for the step command
         }else if(strcmp(command,"step")==0){
