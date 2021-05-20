@@ -158,7 +158,7 @@ node **findFinishIO(node **head,int systime){
     return (trace);
 }
 /**
- * tnis prints a report for the start of a burst
+ * this prints a report for the start of a burst
  * @param working the node to be worked on
  * @param enviro the enviroment that you are using
  */
